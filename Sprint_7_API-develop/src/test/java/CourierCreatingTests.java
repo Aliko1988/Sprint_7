@@ -77,4 +77,6 @@ public class CourierCreatingTests {
         Response postRequestCreateCourier = courierClient.getPostRequestCreateCourier(new Courier("", "", "ron"));
         postRequestCreateCourier.then().log().all().assertThat().statusCode(400).and().body("message", Matchers.is("Недостаточно данных для создания учетной записи"));
     }
+
+
 }

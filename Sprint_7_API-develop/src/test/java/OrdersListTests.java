@@ -1,21 +1,45 @@
-import io.qameta.allure.Description;
+
+import io.qameta.allure.Step;
 import io.qameta.allure.junit4.DisplayName;
 import io.restassured.RestAssured;
+import io.restassured.response.Response;
 import org.junit.Before;
 import org.junit.Test;
 
 import static io.restassured.RestAssured.given;
+import static org.hamcrest.CoreMatchers.*;
 
 public class OrdersListTests {
+
     @Before
     public void setUp() {
-        RestAssured.baseURI = "https://qa-scooter.praktikum-services.ru";
+        RestAssured.baseURI = "http://qa-scooter.praktikum-services.ru/";
+    }
+
+    @Step("Получение списка заказов")
+    public Response getListOrders(){
+        return given()
+                .header("Content-type", "application/json")
+                .and()
+                .get("/api/v1/orders");
+    }
+
+    @Step("Смотрит чтобы поля не были пустыми")
+    public void compareBodyOrderField( Response response){
+        response
+                .then()
+                .assertThat()
+                .body("orders", notNullValue())
+                .and()
+                .statusCode(200)
+                .and()
+                .body("orders", not(containsString("error")));
     }
 
     @Test
-    @DisplayName("Список заказов")
-    @Description("Проверка получения списка заказов для /api/v1/orders")
-    public void getListOrdersTest() {
-        given().header("Content-type", "application/json").log().all().get("/api/v1/orders").then().assertThat().statusCode(200);
+    @DisplayName("Создание заказа и проверка есть ли в теле ответа поле заказы")
+    public void testCreateOrder() {
+        Response response = getListOrders();
+        compareBodyOrderField(response);
     }
 }
